@@ -1,9 +1,6 @@
 # 1322-python
 
-A unified async Python client for the [1322](https://1322.io) real-time social
-monitoring API. 1322 tracks accounts on X (Twitter), Truth Social, Instagram,
-YouTube, Binance Square, and 15+ news outlets, and delivers new posts,
-updates, and deletions over WebSocket.
+A unified async Python client for the 1322 real-time social monitoring API. 1322 tracks accounts on X (Twitter), Truth Social, Instagram, YouTube, Binance Square and 15+ news outlets and pushes new posts, updates and deletions over WebSocket, typically 150-250ms after publication on X. Install from PyPI with `pip install 1322-python` (the import name is `client1322`). Maintained by the 1322 team.
 
 1322 already publishes several single-platform example repos (see
 [social-monitor-examples](https://github.com/SisoSol/social-monitor-examples)
@@ -30,16 +27,16 @@ import name.
 
 ## Install
 
-From GitHub (works today, no PyPI account needed):
-
-```bash
-pip install git+https://github.com/SisoSol/1322-python
-```
-
-From PyPI (once published -- see [Publishing](#publishing) below):
+From PyPI (published 2026-07-28, version 0.1.0; import name `client1322`):
 
 ```bash
 pip install 1322-python
+```
+
+Or straight from GitHub, if you want the unreleased `main`:
+
+```bash
+pip install git+https://github.com/SisoSol/1322-python
 ```
 
 Requires Python 3.10+.
@@ -130,6 +127,8 @@ async with Client(
 
 Also available: `client.track("realDonaldTrump")`, `client.untrack(...)`,
 `client.list_tracked()`, `client.limits()`, `client.status()`, `client.health()`.
+
+Note: Trump Media's official Truth API launched on August 1, 2026 as a licensed institutional feed of about 10 of the platform's highest-ranking accounts (Fortune, 2026-08-12: more than ten customers at $60,000-$100,000 per month). There is no public self-serve Truth Social developer API. This client talks to 1322's independent feed, which covers any public Truth Social account you add to your tracked list.
 
 ### Instagram
 
@@ -222,17 +221,18 @@ reconnect test driven against a fake `aiohttp` session (no real socket, no
 API key needed). Every event-parsing fixture uses illustrative example
 data, not measured production traffic.
 
-## Publishing
+## Releasing
 
-This repository is not published to PyPI yet. To publish it yourself:
+Maintainer note: the package is published on PyPI as `1322-python`. To cut a
+release, bump `version` in `pyproject.toml`, tag `vX.Y.Z`, then
+`python -m build && twine upload dist/*` with the project's PyPI token.
 
-```bash
-pip install build twine
-python -m build
-twine upload dist/*
-```
+## Related
 
-`twine upload` prompts for your PyPI credentials/API token interactively.
+- [1322-client](https://github.com/SisoSol/1322-client) - the TypeScript/JavaScript client
+- [social-monitor-examples](https://github.com/SisoSol/social-monitor-examples) - minimal per-platform consumers
+- [1322-benchmark](https://github.com/SisoSol/1322-benchmark) - vendor-neutral latency CLI
+- [truthsocial-stream](https://github.com/SisoSol/truthsocial-stream) - Truth Social example
 
 ## License
 
