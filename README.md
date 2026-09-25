@@ -1,10 +1,10 @@
 # 1322-python
 
-A unified async Python client for the 1322 real-time social monitoring API. 1322 tracks accounts on X (Twitter), Truth Social, Instagram, YouTube, Binance Square and 15+ news outlets and pushes new posts, updates and deletions over WebSocket, typically 150-250ms after publication on X. Install from PyPI with `pip install 1322-python` (the import name is `client1322`). Maintained by the 1322 team.
+A unified async Python client for the 1322 real-time social monitoring API. 1322 tracks accounts on X (Twitter), Truth Social, Instagram, YouTube, Binance Square and 15+ news outlets and pushes each source's supported events over WebSocket (on X that includes updates and deletions), typically 150-250ms after publication on X. Install from PyPI with `pip install 1322-python` (the import name is `client1322`). Maintained by the 1322 team.
 
 1322 already publishes several single-platform example repos (see
-[social-monitor-examples](https://github.com/SisoSol/social-monitor-examples)
-and [binance-square-realtime](https://github.com/SisoSol/binance-square-realtime)).
+[social-monitor-examples](https://github.com/1322monitors/social-monitor-examples)
+and [binance-square-realtime](https://github.com/1322monitors/binance-square-realtime)).
 This package is different: it's one installable, typed client covering all
 six platforms behind a single consistent async shape, instead of copying a
 connection script per platform.
@@ -36,7 +36,7 @@ pip install 1322-python
 Or straight from GitHub, if you want the unreleased `main`:
 
 ```bash
-pip install git+https://github.com/SisoSol/1322-python
+pip install git+https://github.com/1322monitors/1322-python
 ```
 
 Requires Python 3.10+.
@@ -207,7 +207,7 @@ and `backoff_base=`/`backoff_cap=` to tune the delay curve.
 ## Development
 
 ```bash
-git clone https://github.com/SisoSol/1322-python
+git clone https://github.com/1322monitors/1322-python
 cd 1322-python
 python -m venv .venv && source .venv/bin/activate   # or .venv\Scripts\activate on Windows
 pip install -e ".[dev]"
@@ -229,10 +229,10 @@ release, bump `version` in `pyproject.toml`, tag `vX.Y.Z`, then
 
 ## Related
 
-- [1322-client](https://github.com/SisoSol/1322-client) - the TypeScript/JavaScript client
-- [social-monitor-examples](https://github.com/SisoSol/social-monitor-examples) - minimal per-platform consumers
-- [1322-benchmark](https://github.com/SisoSol/1322-benchmark) - vendor-neutral latency CLI
-- [truthsocial-stream](https://github.com/SisoSol/truthsocial-stream) - Truth Social example
+- [1322-client](https://github.com/1322monitors/1322-client) - the TypeScript/JavaScript client
+- [social-monitor-examples](https://github.com/1322monitors/social-monitor-examples) - minimal per-platform consumers
+- [1322-benchmark](https://github.com/1322monitors/1322-benchmark) - vendor-neutral latency CLI
+- [truthsocial-stream](https://github.com/1322monitors/truthsocial-stream) - Truth Social example
 
 ## License
 

@@ -9,7 +9,7 @@ description = "Unified async Python client for the 1322 real-time social monitor
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
-authors = [{ name = "SisoSol" }]
+authors = [{ name = "1322" }]
 keywords = [
   "1322",
   "websocket",
@@ -50,8 +50,8 @@ dev = ["pytest>=8.0", "build>=1.0"]
 [project.urls]
 Homepage = "https://1322.io"
 Documentation = "https://1322.io/docs"
-Repository = "https://github.com/SisoSol/1322-python"
-Issues = "https://github.com/SisoSol/1322-python/issues"
+Repository = "https://github.com/1322monitors/1322-python"
+Issues = "https://github.com/1322monitors/1322-python/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/client1322"]
