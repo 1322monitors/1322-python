@@ -4,8 +4,10 @@ monitoring API.
 Distributed on PyPI as ``1322-python``; imported as ``client1322`` because
 Python module names cannot start with a digit. See the README for details.
 
-Covers all six 1322 platforms (X/Twitter, Truth Social, Instagram, News,
-YouTube, Binance Square) behind one consistent async shape:
+Covers six of 1322's eight sources (X/Twitter, Truth Social, Instagram,
+News, YouTube, Binance Square) behind one consistent async shape. Each
+source has its own WebSocket feed and key. TikTok and FOMO are not in this
+client yet: see https://1322.io/docs/tiktok and https://1322.io/docs/fomo.
 
 .. code-block:: python
 
@@ -31,7 +33,7 @@ from .exceptions import (
     UnknownEventError,
 )
 
-__version__ = "0.1.0"
+__version__ = "0.1.2"
 
 __all__ = [
     "Client",

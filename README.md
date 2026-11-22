@@ -1,13 +1,10 @@
 # 1322-python
 
-A unified async Python client for the 1322 real-time social monitoring API. 1322 tracks accounts on X (Twitter), Truth Social, Instagram, YouTube, Binance Square and 15+ news outlets and pushes each source's supported events over WebSocket (on X that includes updates and deletions), typically 150-250ms after publication on X. Install from PyPI with `pip install 1322-python` (the import name is `client1322`). Maintained by the 1322 team.
+An async Python client for 1322's real-time feeds for X (Twitter), Truth Social, Instagram, YouTube, Binance Square and News: six of 1322's eight sources. Each source has its own WebSocket feed and key, managed in one 1322 dashboard; this package connects to each of them through the same async interface, with typed events, auto-reconnect and tracked-list REST helpers. Install from PyPI with `pip install 1322-python` (the import name is `client1322`). Maintained by the 1322 team.
 
-1322 already publishes several single-platform example repos (see
-[social-monitor-examples](https://github.com/1322monitors/social-monitor-examples)
-and [binance-square-realtime](https://github.com/1322monitors/binance-square-realtime)).
-This package is different: it's one installable, typed client covering all
-six platforms behind a single consistent async shape, instead of copying a
-connection script per platform.
+TikTok and FOMO are not in this client yet; see [1322.io/docs/tiktok](https://1322.io/docs/tiktok) and [1322.io/docs/fomo](https://1322.io/docs/fomo).
+
+Plans from $79/month (FOMO Lite); X from $250/month for 100 accounts. A one-day evaluation is available on request, reviewed by the team, no card.
 
 ```python
 from client1322 import Client
@@ -27,7 +24,7 @@ import name.
 
 ## Install
 
-From PyPI (published 2026-07-28, version 0.1.0; import name `client1322`):
+From PyPI:
 
 ```bash
 pip install 1322-python
@@ -41,78 +38,87 @@ pip install git+https://github.com/1322monitors/1322-python
 
 Requires Python 3.10+.
 
-## Why one client instead of six scripts
+## Why a client instead of per-source scripts
 
-1322 documents six platforms, each with its own REST base URL, WebSocket
-connection scheme, auth header, and event payload shape (see
-[1322.io/docs](https://1322.io/docs) for the authoritative contract). This
-package keeps that per-platform reality -- it does not invent a fake common
-REST API that doesn't exist -- but gives you the same connection lifecycle,
-reconnect behavior, and streaming interface everywhere:
+1322 documents each source separately: its own REST base URL, WebSocket
+URL, key and event payload shape (see [1322.io/docs](https://1322.io/docs)
+for the authoritative contract). This package keeps that per-source
+reality (it does not invent a common REST API that doesn't exist, and every
+source still connects to its own WebSocket feed with its own key) but gives
+you the same connection lifecycle, reconnect behavior and streaming
+interface for each source it covers:
 
 - **One shape**: `async with Client(platform=..., api_key=...) as client:`
-  then `async for event in client.stream():`, for all six platforms.
+  then `async for event in client.stream():`, for every covered source.
 - **Typed events**: every event is a `dataclass` with real field types
   (`TypedDict`-typed nested payloads), not a loosely-typed `dict`. Full
   `py.typed` support for IDEs and type checkers.
 - **Auto-reconnect**: exponential backoff (1s, 2s, 4s, 8s, ... capped at
   30s), matching 1322's documented reconnection policy, implemented once
-  and shared by every platform adapter.
+  and shared by every source adapter.
 - **Additive tweet merge**: X tweets arrive across up to four progressive
   stages (`tweet.mini.update` -> `tweet.update` -> `tweet.update.expanded`
   -> `tweet.full`); `TweetMerger` implements 1322's documented merge rules
   (longest text, unioned media, deepest reply/quote chain, highest metrics,
-  never overwrite a populated field with null) so you don't have to.
+  never overwrite a filled field with an empty one) by `tweet.id` so you
+  don't have to.
 - **Thin REST helpers**: `track()` / `untrack()` / `list_tracked()` /
-  `health()` and friends, matching each platform's documented management
-  API exactly.
+  `health()` and friends, matching each source's documented management
+  API (YouTube REST is not wrapped yet, see below).
 
-## Platform coverage
+## Source coverage
 
-| Platform | `platform=` | REST base | Connection details |
-|---|---|---|---|
-| X / Twitter | `"x"` (or `"twitter"`) | `api.1322.io` | fixed WS URL per tier (`normal`/`ultimate`) |
-| Truth Social | `"truth"` | `truth.1322.io` | needs `ws_path`+`ws_key` from your dashboard |
-| Instagram | `"instagram"` | `1322.io` | fixed WS URL, same key as REST |
-| News | `"news"` | `newsfeed.1322.io` | `ws_path`/`ws_key` auto-fetched from `/v1/dashboard` |
-| Binance Square | `"binance"` | `binance.1322.io` | `ws_path`/`ws_key` auto-fetched from `/v1/dashboard` |
-| YouTube | `"youtube"` | -- | requires an explicit `ws_url` (see below) |
+| Source | `platform=` | REST base | WebSocket connection | Docs |
+|---|---|---|---|---|
+| X / Twitter | `"x"` (or `"twitter"`) | `api.1322.io` | fixed URL per stream (`normal` / `ultimate`), key in the `X-API-Key` header | [docs/x](https://1322.io/docs/x) |
+| Truth Social | `"truth"` | `truth.1322.io` | pass `ws_path` + `ws_key` from the API access page | [docs/truth](https://1322.io/docs/truth) |
+| Instagram | `"instagram"` | `1322.io` | `wss://1322.io/IG?key=<api_key>`, the same key as REST | [docs/instagram](https://1322.io/docs/instagram) |
+| YouTube | `"youtube"` | `youtube.1322.io` (not wrapped yet) | pass `ws_url` with `?key=<ws_key>` from `GET /v1/dashboard` | [docs/youtube](https://1322.io/docs/youtube) |
+| Binance Square | `"binance"` | `binance.1322.io` | `ws_path` / `ws_key` fetched from `GET /v1/dashboard` | [docs/binance](https://1322.io/docs/binance) |
+| News | `"news"` | `newsfeed.1322.io` | `ws_path` / `ws_key` fetched from `GET /v1/dashboard` | [docs/news](https://1322.io/docs/news) |
+| TikTok | not in this client yet | | | [docs/tiktok](https://1322.io/docs/tiktok) |
+| FOMO | not in this client yet | | | [docs/fomo](https://1322.io/docs/fomo) |
 
-**About YouTube:** 1322's public docs describe the YouTube event payload
-contract in full (upload / thumbnail upgrade / deletion) but, as of this
-writing, do not publish a fixed WebSocket URL pattern or a customer-facing
-REST tracked-account API for YouTube the way they do for the other five
-platforms. Rather than guess at an undocumented endpoint, `YouTubeAdapter`
-requires you to pass the exact WebSocket URL from your dashboard
-configuration as `ws_url=`, and only implements event parsing -- no
-`track()`/`untrack()`/`list_tracked()`, because 1322's docs don't define
-them for this platform. Check [1322.io/docs](https://1322.io/docs) directly
-if that changes.
+**About YouTube:** the client wraps the YouTube WebSocket stream and its
+three event types (`upload`, `upgrade`, `deletion`). It does not wrap
+YouTube REST yet: track, untrack and list (`POST /v1/track`,
+`POST /v1/untrack`, `GET /v1/list`) and `GET /v1/dashboard` are documented
+at [1322.io/docs/youtube](https://1322.io/docs/youtube); call them with
+your own HTTP client for now. The adapter also does not fetch the stream
+URL for you: take `ws_url` and `ws_key` from `GET /v1/dashboard` (or the
+API access page) and pass `ws_url="<ws_url>?key=<ws_key>"`.
 
-## Usage per platform
+## Usage per source
 
-Runnable examples for all six platforms live in [`examples/`](examples/).
-Each one reads its API key from an environment variable and does something
-useful with the REST helpers plus the event stream. Quick summaries:
+Runnable examples for all six covered sources live in
+[`examples/`](https://github.com/1322monitors/1322-python/tree/main/examples). Each one reads its key from an environment
+variable and consumes the event stream; all but YouTube also call a REST
+helper first. Quick summaries:
 
 ### X / Twitter
 
 ```python
 from client1322 import Client, TweetMerger
-from client1322.platforms.x import MiniTweetUpdate, TweetUpdate, TweetFull
+from client1322.platforms.x import MiniTweetUpdate, TweetFull, TweetUpdate, TweetUpdateExpanded
 
 merger = TweetMerger()
 
 async with Client(platform="x", api_key="YOUR_API_KEY_HERE", tier="normal") as client:
     async for event in client.stream():
-        if isinstance(event, (MiniTweetUpdate, TweetUpdate, TweetFull)):
-            merged = merger.merge(event.tweet)  # dedup + additive merge by tweet id
+        if isinstance(event, (MiniTweetUpdate, TweetUpdate, TweetUpdateExpanded, TweetFull)):
+            merged = merger.merge(event.tweet)  # dedupe + additive merge by tweet.id
             print(merged["author"]["handle"], merged["body"]["text"])
 ```
 
-Also available: `client.list_tracked()`, `client.add_tracked("elonmusk")`,
-`client.remove_tracked("elonmusk")`, `client.list_keys()`,
-`client.get_tweet(tweet_id, full=True)`, `client.resolve_username("elonmusk")`.
+`tweet.type` is `TWEET`, `RETWEET`, `QUOTE` or `REPLY`, and
+`tweet.created_at` is Unix milliseconds. Deletions arrive as
+`DeletedTweet` (`tweet.deleted`). On a hybrid plan, run one client per
+stream (`tier="normal"` and `tier="ultimate"`), each with its own key, and
+feed both into the same `TweetMerger`.
+
+Also available: `client.list_tracked()`, `client.add_tracked("exampledesk")`,
+`client.remove_tracked("exampledesk")`, `client.list_keys()`,
+`client.get_tweet(tweet_id, full=True)`, `client.resolve_username("exampledesk")`.
 
 ### Truth Social
 
@@ -122,35 +128,54 @@ async with Client(
     ws_path="YOUR_WS_PATH_HERE", ws_key="YOUR_WS_KEY_HERE",
 ) as client:
     async for post in client.stream():
-        print(post.username, post.text)
+        kind = "retruth" if post.is_retruth else "quote" if post.is_quote else "post"
+        print(kind, post.key, post.username, post.text)
 ```
 
-Also available: `client.track("realDonaldTrump")`, `client.untrack(...)`,
-`client.list_tracked()`, `client.limits()`, `client.status()`, `client.health()`.
+Each frame is one Truth Social post with no `type` field; dedupe on
+`post.key`. On a retruth, `post.username` is the account that retruthed.
 
-Note: Trump Media's official Truth API launched on August 1, 2026 as a licensed institutional feed of about 10 of the platform's highest-ranking accounts (Fortune, 2026-08-12: more than ten customers at $60,000-$100,000 per month). There is no public self-serve Truth Social developer API. This client talks to 1322's independent feed, which covers any public Truth Social account you add to your tracked list.
+Also available: `client.track("examplecampaign")`, `client.untrack(...)`,
+`client.list_tracked()`, `client.limits()`, `client.status()`, `client.health()`.
 
 ### Instagram
 
 ```python
 async with Client(platform="instagram", api_key="YOUR_API_KEY_HERE") as client:
     async for post in client.stream():
-        print(post.post_type, post.username, post.text)
+        print(post.post_type, post.key, post.username, post.text)
 ```
 
-Also available: `client.track("username")`, `client.untrack(...)`,
+`post.post_type` is `post`, `reel`, `story` or `carousel`; dedupe on
+`post.key`. Fields such as `is_collab`, `collab_with`, `is_pinned`,
+`is_paid_partnership` and `location` are `None` unless the post has that
+context.
+
+Also available: `client.track("examplebrand")`, `client.untrack(...)`,
 `client.list_tracked()`, `client.limits()`, `client.health()`.
 
-### News
+### YouTube
 
 ```python
-async with Client(platform="news", api_key="YOUR_API_KEY_HERE") as client:
-    async for article in client.stream():
-        print(article.feed, article.title, article.url)
+from client1322.platforms.youtube import DeletionMessage, UploadMessage, UpgradeMessage
+
+async with Client(
+    platform="youtube", api_key="YOUR_API_KEY_HERE",
+    ws_url="YOUR_WS_URL_HERE?key=YOUR_WS_KEY_HERE",
+) as client:
+    async for event in client.stream():
+        if isinstance(event, UploadMessage):
+            print(event.subtype, event.video["id"], event.channel["name"], event.video["title"])
+        elif isinstance(event, UpgradeMessage):
+            print("image upgraded:", event.upgrade["video_id"], event.upgrade["url"])
+        elif isinstance(event, DeletionMessage):
+            print("deleted:", event.video["id"])
 ```
 
-Also available: `client.dashboard()`, `client.subscribe("BBC News")`,
-`client.unsubscribe(...)`.
+`upload` is the primary event (`subtype` is `video` or `short`); `upgrade`
+is conditional and most videos never produce one; `deletion` is a separate,
+later event. Channel fields and `video["title"]` can be `None`. No YouTube
+REST helpers yet (see "About YouTube" above).
 
 ### Binance Square
 
@@ -160,36 +185,39 @@ from client1322.platforms.binance import BinancePinUpdateEvent, BinancePostEvent
 async with Client(platform="binance", api_key="YOUR_API_KEY_HERE") as client:
     async for event in client.stream():
         if isinstance(event, BinancePostEvent):
-            print(event.post["username"], event.post.get("tendency"), event.post.get("text"))
+            print(event.post["id"], event.post["username"], event.post.get("tendency"), event.post.get("text"))
         elif isinstance(event, BinancePinUpdateEvent):
             print("pin change:", event.pin["username"])
 ```
 
-Also available: `client.track("CZ_Binance")`, `client.untrack(...)`, `client.dashboard()`.
+Every frame is `{type, data}` with `type` `binance.post` or
+`binance.pin.update`; `event.post` / `event.pin` is the `data` object.
 
-### YouTube
+Also available: `client.track("examplecrypto")`, `client.untrack(...)`, `client.dashboard()`.
+
+### News
 
 ```python
-from client1322.platforms.youtube import DeletionMessage, UploadMessage, UpgradeMessage
-
-async with Client(
-    platform="youtube", api_key="YOUR_API_KEY_HERE", ws_url="YOUR_WS_URL_HERE"
-) as client:
-    async for event in client.stream():
-        if isinstance(event, UploadMessage):
-            print(event.channel["name"], event.video["title"])
-        elif isinstance(event, UpgradeMessage):
-            print("thumbnail upgraded:", event.upgrade["video_id"])
-        elif isinstance(event, DeletionMessage):
-            print("deleted:", event.video["id"])
+async with Client(platform="news", api_key="YOUR_API_KEY_HERE") as client:
+    async for article in client.stream():
+        print(article.feed, article.title, article.url)
 ```
+
+One message per article from every feed you subscribe to; dedupe on
+`article.guid`. Feed names must match the available feeds list in the docs
+exactly, for example `BBC News`.
+
+Also available: `client.dashboard()`, `client.subscribe("BBC News")`,
+`client.unsubscribe(...)`.
 
 ## Auth and secrets
 
-Each platform key comes from your [1322 dashboard](https://1322.io). Never
-hardcode a key in source; read it from the environment instead. See
-[`.env.example`](.env.example) for the full list of variables each platform
-example expects.
+Each source has its own key, shown on the API access page of your 1322
+dashboard. Never hardcode a key in source; read it from the environment
+instead. See [`.env.example`](https://github.com/1322monitors/1322-python/blob/main/.env.example) for the variables each example
+expects. Run the client on your own server, never in browser code: your
+key must stay private, and the REST endpoints are not built for
+cross-origin (CORS) browser requests.
 
 ## Reconnection
 
@@ -215,25 +243,28 @@ pytest
 ```
 
 The test suite (`tests/`) covers backoff math, additive tweet merging, and
-event parsing for all six platforms against payload shapes taken from
+event parsing for the six covered sources against payload shapes taken from
 [1322.io/docs](https://1322.io/docs), plus an end-to-end `Client.stream()`
 reconnect test driven against a fake `aiohttp` session (no real socket, no
 API key needed). Every event-parsing fixture uses illustrative example
-data, not measured production traffic.
+data, not production traffic.
 
 ## Releasing
 
 Maintainer note: the package is published on PyPI as `1322-python`. To cut a
-release, bump `version` in `pyproject.toml`, tag `vX.Y.Z`, then
-`python -m build && twine upload dist/*` with the project's PyPI token.
+release, bump `version` in `pyproject.toml` and `__version__` in
+`src/client1322/__init__.py`, add a [`CHANGELOG.md`](https://github.com/1322monitors/1322-python/blob/main/CHANGELOG.md) entry,
+tag `vX.Y.Z`, then `python -m build && twine upload dist/*` with the
+project's PyPI token.
 
 ## Related
 
 - [1322-client](https://github.com/1322monitors/1322-client) - the TypeScript/JavaScript client
-- [social-monitor-examples](https://github.com/1322monitors/social-monitor-examples) - minimal per-platform consumers
-- [1322-benchmark](https://github.com/1322monitors/1322-benchmark) - vendor-neutral latency CLI
+- [social-monitor-examples](https://github.com/1322monitors/social-monitor-examples) - minimal per-source consumers
+- [binance-square-realtime](https://github.com/1322monitors/binance-square-realtime) - Binance Square example
 - [truthsocial-stream](https://github.com/1322monitors/truthsocial-stream) - Truth Social example
+- [1322-benchmark](https://github.com/1322monitors/1322-benchmark) - latency measurement CLI
 
 ## License
 
-MIT, see [LICENSE](LICENSE).
+MIT, see [LICENSE](https://github.com/1322monitors/1322-python/blob/main/LICENSE).

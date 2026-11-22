@@ -24,7 +24,7 @@ from client1322.platforms.x import (
     tweet_of,
 )
 
-MINI_USER = {"id": "44196397", "handle": "elonmusk", "name": "Elon Musk", "avatar": None}
+MINI_USER = {"id": "1500000000000000001", "handle": "exampledesk", "name": "Example Desk", "avatar": None}
 
 MINI_TWEET = {
     "id": "1234567890123456789",
@@ -39,15 +39,15 @@ MINI_TWEET = {
 }
 
 FULL_USER = {
-    "id": "44196397",
-    "handle": "elonmusk",
+    "id": "1500000000000000001",
+    "handle": "exampledesk",
     "private": False,
     "verified": True,
     "sensitive": False,
     "restricted": False,
     "joined_at": 1234567890000,
     "profile": {
-        "name": "Elon Musk",
+        "name": "Example Desk",
         "location": None,
         "avatar": None,
         "banner": None,
@@ -82,7 +82,7 @@ def test_parse_mini_tweet_update():
     assert isinstance(event, MiniTweetUpdate)
     assert event.type == "tweet.mini.update"
     assert event.tweet["id"] == "1234567890123456789"
-    assert event.tweet["author"]["handle"] == "elonmusk"
+    assert event.tweet["author"]["handle"] == "exampledesk"
     assert event.raw is raw
     assert tweet_of(event) is event.tweet
 

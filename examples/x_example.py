@@ -14,21 +14,28 @@ import asyncio
 import os
 
 from client1322 import Client, TweetMerger
-from client1322.platforms.x import DeletedTweet, MiniTweetUpdate, TweetFull, TweetUpdate
+from client1322.platforms.x import (
+    DeletedTweet,
+    MiniTweetUpdate,
+    TweetFull,
+    TweetUpdate,
+    TweetUpdateExpanded,
+)
 
 API_KEY = os.environ.get("X_API_KEY", "YOUR_API_KEY_HERE")
 TIER = os.environ.get("X_TIER", "normal")  # "normal" or "ultimate"
 
 
 async def main() -> None:
-    merger = TweetMerger()  # additive merge across mini -> update -> full stages
+    # Additive merge across the mini -> update -> update.expanded -> full stages.
+    merger = TweetMerger()
 
     async with Client(platform="x", api_key=API_KEY, tier=TIER) as client:
         tracked = await client.list_tracked()
         print(f"Currently tracking {len(tracked.get('trackedAccounts', []))} account(s).")
 
         async for event in client.stream():
-            if isinstance(event, (MiniTweetUpdate, TweetUpdate, TweetFull)):
+            if isinstance(event, (MiniTweetUpdate, TweetUpdate, TweetUpdateExpanded, TweetFull)):
                 merged = merger.merge(event.tweet)
                 author = merged["author"].get("handle", "?")
                 text = merged["body"]["text"]

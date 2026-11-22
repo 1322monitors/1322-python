@@ -27,44 +27,85 @@ Tendency = Literal["bullish", "bearish", ""]
 
 
 class MediaItem(TypedDict, total=False):
+    kind: str  # "image" | "video" | "gif" | other
     url: str
-    type: str
+    preview: str  # poster / thumbnail
+    mime_type: str
     width: int
     height: int
+    duration_s: float
+    scope: Literal["post", "quote", "quote_nested", "reply_to"]
 
 
 class PostPollOption(TypedDict, total=False):
     label: str
+    value: str
     votes: int
+    ratio: float
 
 
 class PostPoll(TypedDict, total=False):
-    options: list[PostPollOption]
+    question: str
+    total_votes: int
     ends_at: str
+    closed: bool
+    options: list[PostPollOption]
 
 
-class PostQuote(TypedDict, total=False):
-    id: str
-    username: str
-    text: str
+class PostLink(TypedDict, total=False):
     url: str
+    kind: str
+    domain: str
+    label: str
 
 
 class PostTranslation(TypedDict, total=False):
-    language: str
+    body: str
+    source_language: str
+    target_language: str
+    need_translate: bool
+
+
+class PostQuote(TypedDict, total=False):
+    """The quoted or replied-to post (``quote``, ``reply_to``, ``nested``)."""
+
+    id: str
+    username: str
+    display_name: str
+    avatar_url: str
     text: str
+    link: str
+    published_at: str
+    tendency: str
+    bullish_ratio: float
+    bearish_ratio: float
+    coin_pairs: list[str]
+    hashtags: list[str]
+    mentions: list[str]
+    links: list[PostLink]
+    media: list[MediaItem]
+    poll: PostPoll
+    nested: "PostQuote"
+    translation: PostTranslation
 
 
 class SpaceLiveReplay(TypedDict, total=False):
-    url: str
-    duration_seconds: int
+    title: str
+    duration_s: float
+    replay_url: str
+    status: int
+    live_type: int
+    live_status: int
+    view_count: int
+    audio_web_url: str
+    content_type: str
 
 
 class PostResolvedLink(TypedDict, total=False):
+    kind: str
+    label: str
     url: str
-    title: str
-    description: str
-    image: str
+    raw: str
 
 
 class BinancePost(TypedDict, total=False):

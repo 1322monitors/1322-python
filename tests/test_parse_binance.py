@@ -21,8 +21,8 @@ def test_parse_binance_post_event():
         "type": "binance.post",
         "data": {
             "id": "p1",
-            "username": "CZ_Binance",
-            "display_name": "CZ",
+            "username": "examplecrypto",
+            "display_name": "Example Crypto",
             "avatar_url": "https://example.com/a.jpg",
             "square_uid": "123456789",
             "content_type": "post",
@@ -38,7 +38,7 @@ def test_parse_binance_post_event():
     event = parse_binance_event(raw)
     assert isinstance(event, BinancePostEvent)
     assert event.type == "binance.post"
-    assert event.post["username"] == "CZ_Binance"
+    assert event.post["username"] == "examplecrypto"
     assert event.post["tendency"] == "bullish"
     assert event.post["coin_pairs"] == ["BTCUSDT", "ETHUSDT"]
     assert event.raw is raw
@@ -48,9 +48,9 @@ def test_parse_binance_pin_update_event():
     raw = {
         "type": "binance.pin.update",
         "data": {
-            "username": "CZ_Binance",
-            "display_name": "CZ",
-            "added": [{"id": "p2", "username": "CZ_Binance", "is_reply": False}],
+            "username": "examplecrypto",
+            "display_name": "Example Crypto",
+            "added": [{"id": "p2", "username": "examplecrypto", "is_reply": False}],
             "removed": [],
             "removed_ids": [],
             "detected_at": "2026-07-28T12:00:01Z",

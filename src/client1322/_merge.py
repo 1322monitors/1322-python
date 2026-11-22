@@ -29,6 +29,22 @@ _PROXIED_ARRAY_KEYS = ("images", "thumbnails")
 _METRIC_KEYS = ("likes", "quotes", "replies", "retweets")
 
 
+def _is_empty(val: Any) -> bool:
+    """True for ``None`` and for an empty list, dict or string."""
+    return val is None or (isinstance(val, (list, dict, str)) and len(val) == 0)
+
+
+def _should_take(dst_val: Any, src_val: Any) -> bool:
+    """Whether a later stage's ``src_val`` may replace ``dst_val``.
+
+    Null never replaces anything, and an empty value never replaces a
+    populated one ("a later stage may lack data an earlier stage had").
+    """
+    if src_val is None:
+        return False
+    return not (_is_empty(src_val) and not _is_empty(dst_val))
+
+
 def _union_preserve_order(a: list[Any], b: list[Any]) -> list[Any]:
     seen: set[Any] = set()
     out: list[Any] = []
@@ -50,9 +66,9 @@ def _merge_body(dst: dict[str, Any], src: dict[str, Any]) -> None:
         dst["text"] = src_text
     # Other body fields (urls, mentions, components) are not called out with
     # a specific merge rule in the docs; apply the general "later stage
-    # enriches, never overwrite with null" rule.
+    # enriches, never overwrite with null/empty" rule.
     for key, val in src.items():
-        if key == "text" or val is None:
+        if key == "text" or not _should_take(dst.get(key), val):
             continue
         dst[key] = val
 
@@ -137,10 +153,10 @@ def _merge_tweet_dicts(dst: dict[str, Any], src: dict[str, Any]) -> None:
             _merge_metrics(dst["metrics"], src_val)
         elif key == "subtweet":
             dst["subtweet"] = _merge_subtweet(dst.get("subtweet"), src_val)
-        elif src_val is not None:
+        elif _should_take(dst.get(key), src_val):
             dst[key] = src_val
-        # src_val is None and key already absent/None in dst: nothing to do.
-        # src_val is None and dst has a populated value: never overwrite.
+        # Otherwise src_val is None, or it is empty while dst already holds a
+        # populated value: never overwrite.
 
 
 def merge_tweet(base: dict[str, Any] | None, incoming: dict[str, Any]) -> dict[str, Any]:

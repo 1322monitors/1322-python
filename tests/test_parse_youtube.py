@@ -21,22 +21,36 @@ def test_parse_upload_message():
     raw = {
         "type": "upload",
         "subtype": "video",
-        "channel": {"id": "UC123", "name": "Example Channel", "url": "https://youtube.com/@example"},
+        "detected_at": "2026-07-28T12:00:01Z",
+        "channel": {
+            "id": "UC123",
+            "name": "Example Channel",
+            "url": "https://youtube.com/@example",
+            "avatar": None,
+        },
         "video": {
             "id": "vid123",
             "url": "https://youtube.com/watch?v=vid123",
             "title": "My Video",
-            "metadata": {"duration_seconds": 600, "category": "Tech"},
+            "description": None,
+            "published_at": "2026-07-28T12:00:00Z",
+            "updated_at": None,
+            "duration_display": "10:00",
         },
-        "images": {"seed": "https://i.ytimg.com/vi/vid123/seed.jpg", "chosen": None},
+        "images": {
+            "seed": "https://i.ytimg.com/vi/vid123/seed.jpg",
+            "chosen": None,
+            "thumbnail_small": None,
+        },
     }
     event = parse_youtube_event(raw)
     assert isinstance(event, UploadMessage)
     assert event.subtype == "video"
     assert event.channel["name"] == "Example Channel"
     assert event.video["id"] == "vid123"
-    assert event.video["metadata"]["duration_seconds"] == 600
+    assert event.video["duration_display"] == "10:00"
     assert event.images["chosen"] is None
+    assert event.raw["detected_at"] == "2026-07-28T12:00:01Z"
 
 
 def test_parse_upload_message_short_subtype():

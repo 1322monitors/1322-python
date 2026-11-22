@@ -4,21 +4,27 @@ build-backend = "hatchling.build"
 
 [project]
 name = "1322-python"
-version = "0.1.1"
-description = "Unified async Python client for the 1322 real-time social monitoring API (X, Instagram, Truth Social, YouTube, Binance Square, News)."
+version = "0.1.2"
+description = "Async Python client for 1322's real-time feeds for X (Twitter), Truth Social, Instagram, YouTube, Binance Square and News (six of 1322's eight sources): typed events, auto-reconnect and tracked-list REST helpers."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"
-authors = [{ name = "1322" }]
+authors = [{ name = "1322 Monitors", email = "support@1322.io" }]
+maintainers = [{ name = "1322 Monitors", email = "support@1322.io" }]
 keywords = [
   "1322",
   "websocket",
   "twitter",
   "x",
+  "twitter-websocket-api",
   "instagram",
   "truth-social",
+  "truth-social-api",
   "youtube",
   "binance",
+  "binance-square",
+  "binance-square-api",
+  "news",
   "async",
   "realtime",
   "social-media-monitoring",
@@ -48,10 +54,12 @@ dependencies = [
 dev = ["pytest>=8.0", "build>=1.0"]
 
 [project.urls]
-Homepage = "https://1322.io"
+Homepage = "https://1322.io/docs"
 Documentation = "https://1322.io/docs"
 Repository = "https://github.com/1322monitors/1322-python"
+Source = "https://github.com/1322monitors/1322-python"
 Issues = "https://github.com/1322monitors/1322-python/issues"
+Changelog = "https://github.com/1322monitors/1322-python/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/client1322"]

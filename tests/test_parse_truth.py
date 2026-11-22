@@ -12,12 +12,12 @@ from client1322.platforms.truth import TruthPostEvent, parse_truth_event
 def test_parse_simple_post():
     raw = {
         "platform": "truth",
-        "username": "realDonaldTrump",
-        "display_name": "Donald J. Trump",
+        "username": "examplecampaign",
+        "display_name": "Example Campaign",
         "user_avatar": "https://example.com/avatar.jpg",
         "user_following": 100,
         "user_followers": 9000000,
-        "user_id": "107780257626128497",
+        "user_id": "109000000000000001",
         "key": "113000000000000001",
         "timestamp": "2026-07-28T12:00:00Z",
         "seen_at": "2026-07-28T12:00:00.150Z",
@@ -26,7 +26,7 @@ def test_parse_simple_post():
     }
     event = parse_truth_event(raw)
     assert isinstance(event, TruthPostEvent)
-    assert event.username == "realDonaldTrump"
+    assert event.username == "examplecampaign"
     assert event.key == "113000000000000001"
     assert event.is_quote is None
     assert event.media == []
@@ -36,8 +36,8 @@ def test_parse_simple_post():
 def test_parse_quote_with_nested_quote_and_authors():
     raw = {
         "platform": "truth",
-        "username": "DanScavino",
-        "display_name": "Dan Scavino",
+        "username": "exampleaide",
+        "display_name": "Example Aide",
         "user_avatar": "https://example.com/a.jpg",
         "user_following": 10,
         "user_followers": 500000,

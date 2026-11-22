@@ -1,4 +1,4 @@
-"""The unified ``Client`` facade covering all six 1322 platforms.
+"""The unified ``Client`` facade for six of 1322's eight sources.
 
 .. code-block:: python
 
@@ -59,7 +59,8 @@ class Client:
         takes ``ws_path``/``ws_key`` (or ``ws_url``). News and Binance Square
         take optional ``ws_path``/``ws_key``/``ws_url`` -- if omitted, they
         are fetched automatically from that platform's ``/v1/dashboard``.
-        YouTube requires ``ws_url`` explicitly (see
+        YouTube requires ``ws_url`` explicitly: the ``ws_url`` from
+        YouTube's ``GET /v1/dashboard`` with ``?key=<ws_key>`` appended (see
         :mod:`client1322.platforms.youtube`).
     """
 

@@ -4,7 +4,7 @@
 - media arrays are unioned
 - deepest subtweet chain wins
 - highest metric values win
-- a populated field is never overwritten with null
+- a populated field is never overwritten with null or empty
 """
 
 from __future__ import annotations
@@ -132,6 +132,32 @@ def test_null_never_overwrites_a_populated_field():
         "description": "d",
         "image": "i",
     }
+
+
+def test_empty_values_never_overwrite_populated_fields():
+    url = {"name": "example.com", "url": "https://example.com", "tco": "https://t.co/x"}
+    mention = {"id": "u2", "name": "Bob", "handle": "bob"}
+    card = {"url": "https://example.com", "title": "t", "description": "d", "image": "i"}
+    early = _mini(card=card, lang="en")
+    early["body"] = {"text": "hi", "urls": [url], "mentions": [mention]}
+    later = _mini(card={}, lang="")
+    later["body"] = {"text": "hi", "urls": [], "mentions": [], "components": []}
+
+    merged = merge_tweet(early, later)
+    assert merged["body"]["urls"] == [url]
+    assert merged["body"]["mentions"] == [mention]
+    assert merged["card"] == card
+    assert merged["lang"] == "en"
+    # An empty value still fills a field the earlier stage did not have.
+    assert merged["body"]["components"] == []
+
+
+def test_falsy_non_empty_values_still_replace():
+    early = _mini(sensitive=True, edit_count=2)
+    later = _mini(sensitive=False, edit_count=0)
+    merged = merge_tweet(early, later)
+    assert merged["sensitive"] is False
+    assert merged["edit_count"] == 0
 
 
 def test_later_non_null_field_replaces_earlier_null():

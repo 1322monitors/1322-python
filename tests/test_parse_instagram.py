@@ -12,8 +12,8 @@ from client1322.platforms.instagram import InstagramPostEvent, parse_instagram_e
 def test_parse_basic_post():
     raw = {
         "platform": "instagram",
-        "username": "natgeo",
-        "display_name": "National Geographic",
+        "username": "examplebrand",
+        "display_name": "Example Brand",
         "user_avatar": "https://example.com/a.jpg",
         "user_followers": 200000000,
         "user_id": "1",
